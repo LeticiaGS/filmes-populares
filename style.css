@@ -26,6 +26,11 @@ body {
   color: #fff;
 }
 
+h1.no-movie {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
 header {
   display: flex;
   flex-direction: column;
@@ -53,6 +58,8 @@ header .search input {
   width: 90%;
   height: 100%;
   border: none;
+  font-size: 1.6rem;
+  font-weight: 600;
 }
 header .search input:focus {
   box-shadow: 0 0 0 0;
@@ -84,19 +91,17 @@ section#movies {
 section#movies .movie {
   display: flex;
   align-items: center;
+  justify-content: space-around;
+  width: 100rem;
   padding: 3rem;
   margin-top: 4rem;
   background-color: #1D1C3B;
   box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.2);
   border-radius: 0.8rem;
 }
-section#movies .movie .movie-image {
+section#movies .movie .movie-image img {
   width: 9.2rem;
   height: 9.2rem;
-}
-section#movies .movie .movie-image img {
-  width: 100%;
-  height: 100%;
   object-fit: cover;
   border-radius: 50%;
   box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.3);
@@ -128,9 +133,10 @@ section#movies .movie .movie-text span {
   margin-left: 1rem;
 }
 section#movies .movie .movie-description {
-  width: 59rem;
+  max-width: 59rem;
 }
 section#movies .movie .movie-description p {
+  width: 59rem;
   font-weight: 500;
   font-size: 1.2rem;
   color: var(--description);

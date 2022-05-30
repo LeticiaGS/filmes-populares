@@ -1,44 +1,65 @@
+import { APIKey } from './config/APIKey.js'
+
 const moviesContainer = document.getElementById('movies')
+const input = document.querySelector('input')
+const searchButton = document.getElementById('icon-search')
 
-const movies = [
-  {
-    image:
-      'https://img.elo7.com.br/product/original/3FBA809/big-poster-filme-batman-2022-90x60-cm-lo002-poster-batman.jpg',
-    title: 'Batman',
-    rating: 8.2,
-    year: 2022,
-    description:
-      'Batman se aventura no submundo de Gotham City quando um assassino sádico deixa para trás um rastro de pistas enigmáticas. À medida que as evidências começam a chegar mais perto de casa e a escala dos planos do criminoso se torna clara, ele deve forjar novos relacionamentos, desmascarar o culpado e trazer justiça ao abuso de poder e à corrupção que há muito atormentam a metrópole.',
-    isFavorited: true
-  },
-  {
-    image:
-      'https://upload.wikimedia.org/wikipedia/pt/thumb/9/9b/Avengers_Endgame.jpg/250px-Avengers_Endgame.jpg',
-    title: 'Avengers',
-    rating: 9.2,
-    year: 2019,
-    description:
-      'Adrift in space with no food or water, Tony Stark sends a message to Pepper Potts as his oxygen supply starts to dwindle. Meanwhile, the remaining Avengers -- Thor, Black Widow, Captain America and Bruce Banner -- must figure out a way to bring back their vanquished allies for an epic showdown with Thanos -- the evil demigod who decimated the planet and the universe.',
-    isFavorited: false
-  },
-  {
-    image:
-      'https://upload.wikimedia.org/wikipedia/en/1/17/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg',
-    title: 'Doctor Strange',
-    rating: 9.2,
-    year: 2022,
-    description:
-      'A vida do Dr. Stephen Strange (Benedict Cumberbatch) muda depois que um acidente de carro o rouba do uso de suas mãos. Quando a medicina tradicional falha, ele procura cura e esperança em um misterioso enclave. Ele rapidamente descobre que o enclave está na linha de frente de uma batalha contra forças das trevas invisíveis empenhadas em destruir a realidade. Em pouco tempo, Strange é forçado a escolher entre sua vida de fortuna e status ou deixar tudo para trás para defender o mundo como o feiticeiro mais poderoso que existe.',
-    isFavorited: false
+searchButton.addEventListener('click', searchMovie)
+
+input.addEventListener('keyup', e => {
+  if (e.keyCode == 13) {
+    searchMovie()
+    return
   }
-]
+})
 
-window.onload = () => {
+async function searchMovie() {
+  const inputValue = input.value.trim()
+  if (inputValue != '') {
+    clearAllMovies()
+    const movies = await searchMovieByName(input.value)
+    if (movies.length == 0) sorryMensage()
+    movies.forEach(movie => renderMovie(movie))
+    input.value = inputValue
+  } else {
+    clearAllMovies()
+    const movies = await getPopularMovies()
+    movies.forEach(movie => renderMovie(movie))
+    input.value = inputValue
+  }
+}
+
+function clearAllMovies() {
+  moviesContainer.innerHTML = ''
+}
+
+async function searchMovieByName(title) {
+  const url = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&query=${title}&language=en-US&page=1`
+  const fetchResponse = await fetch(url)
+  const { results } = await fetchResponse.json()
+  console.log(results)
+  return results
+}
+
+async function getPopularMovies() {
+  const url = `
+  https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`
+  const fetchResponse = await fetch(url)
+  const { results } = await fetchResponse.json()
+  return results
+}
+
+window.onload = async () => {
+  const movies = await getPopularMovies()
   movies.forEach(movie => renderMovie(movie))
 }
 
 function renderMovie(movie) {
-  const { title, image, rating, year, description, isFavorited } = movie
+  const { title, poster_path, vote_avenrage, release_date, overview } = movie
+  const isFavorited = false
+
+  const year = new Date(release_date).getFullYear()
+  const image = `https://image.tmdb.org/t/p/w500${poster_path}`
 
   const movieElement = document.createElement('div')
   movieElement.classList.add('movie')
@@ -53,7 +74,7 @@ function renderMovie(movie) {
   ImgPhotoElement.alt = `${title} Poster`
   movieImage.appendChild(ImgPhotoElement)
 
-   //////////////////DIV-MOVIE-TEXT////////////////////////////
+  //////////////////DIV-MOVIE-TEXT////////////////////////////
   const movieText = document.createElement('div')
   const titleElement = document.createElement('p')
   const iconsElements = document.createElement('div')
@@ -72,7 +93,7 @@ function renderMovie(movie) {
   iconHeart.alt = 'star-icon'
 
   titleElement.textContent = `${title} (${year})`
-  spanStar.textContent = rating
+  spanStar.textContent = vote_avenrage
   spanHeart.textContent = 'Favoritar'
 
   movieElement.appendChild(movieText)
@@ -83,12 +104,23 @@ function renderMovie(movie) {
   iconsElements.appendChild(iconHeart)
   iconsElements.appendChild(spanHeart)
 
-   //////////////////DIV-MOVIE-DESCRIPTION////////////////////////////
+  //////////////////DIV-MOVIE-DESCRIPTION////////////////////////////
   const movieDescription = document.createElement('div')
   const descriptionElement = document.createElement('p')
   movieDescription.classList.add('movie-description')
-  descriptionElement.textContent = description
+  if (overview === '') {
+    descriptionElement.textContent = 'No description'
+  } else {
+    descriptionElement.textContent = overview
+  }
 
   movieElement.appendChild(movieDescription)
   movieDescription.appendChild(descriptionElement)
+}
+
+function sorryMensage() {
+  const apologizeMessage = document.createElement('h1')
+  apologizeMessage.classList.add('no-movie')
+  apologizeMessage.textContent = "Sorry, we couldn't find that title :("
+  moviesContainer.appendChild(apologizeMessage)
 }
