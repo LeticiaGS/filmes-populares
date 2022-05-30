@@ -49,14 +49,57 @@ async function getPopularMovies() {
   return results
 }
 
+function favoriteButtonPressed(event, movie) {
+  console.log(event, movie.id)
+  const favoriteState = {
+    favorited: 'assets/Vector.svg',
+    notFavorited: 'assets/Heart.svg'
+  }
+
+  if (event.target.src.includes(favoriteState.notFavorited)) {
+    event.target.src = favoriteState.favorited
+    saveToLocalStorage(movie)
+  } else {
+    event.target.src = favoriteState.notFavorited
+    removeFromLocalStorage(movie.id)
+  }
+}
+
+function getFavoriteMovies() {
+  return JSON.parse(localStorage.getItem('favoriteMovies'))
+}
+
+function saveToLocalStorage(movie) {
+  const movies = getFavoriteMovies() || []
+  movies.push(movie)
+
+  const moviesJSON = JSON.stringify(movies)
+  localStorage.setItem('favoriteMovies', moviesJSON) // salva o array no Local Storage
+}
+
+function checkMovieIsFavorited(id) {
+  const movies = getFavoriteMovies() || []
+  return movies.find(movie => movie.id == id)
+}
+
+function removeFromLocalStorage(id) {
+  console.log(id)
+  const movies = getFavoriteMovies() || []
+  const findMovie = movies.find(movie => movie.id == id)
+  console.log(findMovie)
+  const newMovies = movies.filter(movie => movie.id != findMovie.id)
+  localStorage.setItem('favoritesMovies', JSON.stringify(newMovies))
+}
+
 window.onload = async () => {
   const movies = await getPopularMovies()
   movies.forEach(movie => renderMovie(movie))
 }
 
 function renderMovie(movie) {
-  const { title, poster_path, vote_avenrage, release_date, overview } = movie
-  const isFavorited = false
+  const { id, title, poster_path, vote_avenrage, release_date, overview } =
+    movie
+  const isFavorited = checkMovieIsFavorited(id)
 
   const year = new Date(release_date).getFullYear()
   const image = `https://image.tmdb.org/t/p/w500${poster_path}`
@@ -89,7 +132,7 @@ function renderMovie(movie) {
 
   iconStar.src = '/assets/Star.png'
   iconStar.alt = 'star-icon'
-  iconHeart.src = isFavorited ? '/assets/Heart.svg' : '/assets/Vector.svg'
+  iconHeart.src = isFavorited ? 'assets/Vector.svg' : 'assets/Heart.svg'
   iconHeart.alt = 'star-icon'
 
   titleElement.textContent = `${title} (${year})`
@@ -103,6 +146,10 @@ function renderMovie(movie) {
   iconsElements.appendChild(spanStar)
   iconsElements.appendChild(iconHeart)
   iconsElements.appendChild(spanHeart)
+
+  iconHeart.addEventListener('click', event =>
+    favoriteButtonPressed(event, movie)
+  )
 
   //////////////////DIV-MOVIE-DESCRIPTION////////////////////////////
   const movieDescription = document.createElement('div')
