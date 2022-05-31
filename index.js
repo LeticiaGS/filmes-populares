@@ -2,9 +2,27 @@ import { APIKey } from './config/APIKey.js'
 
 const moviesContainer = document.getElementById('movies')
 const input = document.querySelector('input')
+const checkboxInput = document.getElementById('checkbox')
 const searchButton = document.getElementById('icon-search')
 
 searchButton.addEventListener('click', searchMovie)
+checkboxInput.addEventListener('change', checkCkeckboxStatus)
+
+function checkCkeckboxStatus() {
+  const isChecked = checkboxInput.checked
+  if (isChecked) {
+    clearAllMovies()
+    const movies = getFavoriteMovies() || []
+    if (movies.length == 0) {
+      sorryMensage(1)
+    } else {
+      movies.forEach(movie => renderMovie(movie))
+    }
+  } else {
+    clearAllMovies()
+    getAllPopularMovies()
+  }
+}
 
 input.addEventListener('keyup', e => {
   if (e.keyCode == 13) {
@@ -18,13 +36,12 @@ async function searchMovie() {
   if (inputValue != '') {
     clearAllMovies()
     const movies = await searchMovieByName(input.value)
-    if (movies.length == 0) sorryMensage()
+    if (movies.length == 0) sorryMensage(0)
     movies.forEach(movie => renderMovie(movie))
     input.value = inputValue
   } else {
     clearAllMovies()
-    const movies = await getPopularMovies()
-    movies.forEach(movie => renderMovie(movie))
+    getAllPopularMovies()
     input.value = inputValue
   }
 }
@@ -50,7 +67,6 @@ async function getPopularMovies() {
 }
 
 function favoriteButtonPressed(event, movie) {
-  console.log(event, movie.id)
   const favoriteState = {
     favorited: 'assets/Vector.svg',
     notFavorited: 'assets/Heart.svg'
@@ -83,15 +99,22 @@ function checkMovieIsFavorited(id) {
 }
 
 function removeFromLocalStorage(id) {
-  console.log(id)
   const movies = getFavoriteMovies() || []
   const findMovie = movies.find(movie => movie.id == id)
-  console.log(findMovie)
   const newMovies = movies.filter(movie => movie.id != findMovie.id)
   localStorage.setItem('favoritesMovies', JSON.stringify(newMovies))
 }
 
 window.onload = async () => {
+  if (checkboxInput.checked) {
+    clearAllMovies()
+    checkCkeckboxStatus()
+  } else {
+    getAllPopularMovies()
+  }
+}
+
+async function getAllPopularMovies() {
   const movies = await getPopularMovies()
   movies.forEach(movie => renderMovie(movie))
 }
@@ -99,10 +122,12 @@ window.onload = async () => {
 function renderMovie(movie) {
   const { id, title, poster_path, vote_avenrage, release_date, overview } =
     movie
-  const isFavorited = checkMovieIsFavorited(id)
 
+  const isFavorited = checkMovieIsFavorited(id)
   const year = new Date(release_date).getFullYear()
-  const image = `https://image.tmdb.org/t/p/w500${poster_path}`
+  let image = ''
+  if (poster_path == null) image = 'assets/noImageMovie.png'
+  else image = `https://image.tmdb.org/t/p/w500${poster_path}`
 
   const movieElement = document.createElement('div')
   movieElement.classList.add('movie')
@@ -165,9 +190,13 @@ function renderMovie(movie) {
   movieDescription.appendChild(descriptionElement)
 }
 
-function sorryMensage() {
+function sorryMensage(n) {
   const apologizeMessage = document.createElement('h1')
+  let text = ''
   apologizeMessage.classList.add('no-movie')
-  apologizeMessage.textContent = "Sorry, we couldn't find that title :("
+  if (n == 0) text = 'that title :('
+  else
+    text = 'any favorite movies. How about adding some titles in your list? :)'
+  apologizeMessage.textContent = `Sorry, we couldn't find ${text}`
   moviesContainer.appendChild(apologizeMessage)
 }
