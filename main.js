@@ -1,5 +1,5 @@
-import { API } from './services/api.js'
-import { LocalStorage } from './services/localStorage.js'
+import { API } from '../services/api.js'
+import { LocalStorage } from '../services/localStorage.js'
 
 const moviesContainer = document.getElementById('movies')
 const input = document.querySelector('input')
