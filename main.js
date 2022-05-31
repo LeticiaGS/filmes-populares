@@ -1,4 +1,5 @@
-import { APIKey } from './config/APIKey.js'
+import { API } from './services/api.js'
+import { LocalStorage } from './services/localStorage.js'
 
 const moviesContainer = document.getElementById('movies')
 const input = document.querySelector('input')
@@ -13,7 +14,7 @@ function checkCkeckboxStatus() {
   if (isChecked) {
     clearAllMovies()
     input.value = ''
-    const movies = getFavoriteMovies() || []
+    const movies = LocalStorage.getFavoriteMovies() || []
     if (movies.length == 0) {
       sorryMensage(1)
     } else {
@@ -36,7 +37,7 @@ async function searchMovie() {
   const inputValue = input.value.trim()
   if (inputValue != '') {
     clearAllMovies()
-    const movies = await searchMovieByName(input.value)
+    const movies = await API.searchMovieByName(input.value)
     if (movies.length == 0) sorryMensage(0)
     movies.forEach(movie => renderMovie(movie))
     checkboxInput.checked = false
@@ -52,59 +53,19 @@ function clearAllMovies() {
   moviesContainer.innerHTML = ''
 }
 
-async function searchMovieByName(title) {
-  const url = `https://api.themoviedb.org/3/search/movie?api_key=${APIKey}&query=${title}&language=en-US&page=1`
-  const fetchResponse = await fetch(url)
-  const { results } = await fetchResponse.json()
-  console.log(results)
-  return results
-}
-
-async function getPopularMovies() {
-  const url = `
-  https://api.themoviedb.org/3/movie/popular?api_key=${APIKey}&language=en-US&page=1`
-  const fetchResponse = await fetch(url)
-  const { results } = await fetchResponse.json()
-  return results
-}
-
 function favoriteButtonPressed(event, movie) {
   const favoriteState = {
-    favorited: 'assets/Vector.svg',
-    notFavorited: 'assets/Heart.svg'
+    favorited: 'assets/heart-fill.svg',
+    notFavorited: 'assets/heart.svg'
   }
 
   if (event.target.src.includes(favoriteState.notFavorited)) {
     event.target.src = favoriteState.favorited
-    saveToLocalStorage(movie)
+    LocalStorage.saveToLocalStorage(movie)
   } else {
     event.target.src = favoriteState.notFavorited
-    removeFromLocalStorage(movie.id)
+    LocalStorage.removeFromLocalStorage(movie.id)
   }
-}
-
-function getFavoriteMovies() {
-  return JSON.parse(localStorage.getItem('favoriteMovies'))
-}
-
-function saveToLocalStorage(movie) {
-  const movies = getFavoriteMovies() || []
-  movies.push(movie)
-
-  const moviesJSON = JSON.stringify(movies)
-  localStorage.setItem('favoriteMovies', moviesJSON) // salva o array no Local Storage
-}
-
-function checkMovieIsFavorited(id) {
-  const movies = getFavoriteMovies() || []
-  return movies.find(movie => movie.id == id)
-}
-
-function removeFromLocalStorage(id) {
-  const movies = getFavoriteMovies() || []
-  const findMovie = movies.find(movie => movie.id == id)
-  const newMovies = movies.filter(movie => movie.id != findMovie.id)
-  localStorage.setItem('favoritesMovies', JSON.stringify(newMovies))
 }
 
 window.onload = async () => {
@@ -117,7 +78,7 @@ window.onload = async () => {
 }
 
 async function getAllPopularMovies() {
-  const movies = await getPopularMovies()
+  const movies = await API.getPopularMovies()
   movies.forEach(movie => renderMovie(movie))
 }
 
@@ -125,7 +86,7 @@ function renderMovie(movie) {
   const { id, title, poster_path, vote_avenrage, release_date, overview } =
     movie
 
-  const isFavorited = checkMovieIsFavorited(id)
+  const isFavorited = LocalStorage.checkMovieIsFavorited(id)
   const year = new Date(release_date).getFullYear()
   let image = ''
   if (poster_path == null) image = 'assets/noImageMovie.png'
@@ -159,7 +120,7 @@ function renderMovie(movie) {
 
   iconStar.src = '/assets/Star.png'
   iconStar.alt = 'star-icon'
-  iconHeart.src = isFavorited ? 'assets/Vector.svg' : 'assets/Heart.svg'
+  iconHeart.src = isFavorited ? 'assets/heart-fill.svg' : 'assets/heart.svg'
   iconHeart.alt = 'star-icon'
 
   titleElement.textContent = `${title} (${year})`
