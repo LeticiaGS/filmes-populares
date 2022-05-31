@@ -12,6 +12,7 @@ function checkCkeckboxStatus() {
   const isChecked = checkboxInput.checked
   if (isChecked) {
     clearAllMovies()
+    input.value = ''
     const movies = getFavoriteMovies() || []
     if (movies.length == 0) {
       sorryMensage(1)
@@ -38,6 +39,7 @@ async function searchMovie() {
     const movies = await searchMovieByName(input.value)
     if (movies.length == 0) sorryMensage(0)
     movies.forEach(movie => renderMovie(movie))
+    checkboxInput.checked = false
     input.value = inputValue
   } else {
     clearAllMovies()
