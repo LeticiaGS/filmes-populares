@@ -11,8 +11,8 @@ checkboxInput.addEventListener('change', checkCkeckboxStatus)
 
 function checkCkeckboxStatus() {
   const isChecked = checkboxInput.checked
+  clearAllMovies()
   if (isChecked) {
-    clearAllMovies()
     input.value = ''
     const movies = LocalStorage.getFavoriteMovies() || []
     if (movies.length == 0) {
@@ -21,8 +21,8 @@ function checkCkeckboxStatus() {
       movies.forEach(movie => renderMovie(movie))
     }
   } else {
-    clearAllMovies()
     getAllPopularMovies()
+    input.value = ''
   }
 }
 
@@ -35,18 +35,44 @@ input.addEventListener('keyup', e => {
 
 async function searchMovie() {
   const inputValue = input.value.trim()
+  clearAllMovies()
   if (inputValue != '') {
-    clearAllMovies()
-    const movies = await API.searchMovieByName(input.value)
-    if (movies.length == 0) sorryMensage(0)
-    movies.forEach(movie => renderMovie(movie))
-    checkboxInput.checked = false
-    input.value = inputValue
+    if (checkboxInput.checked === false) {
+      const movies = await API.searchMovieByName(inputValue)
+      if (movies.length == 0) sorryMensage(0)
+      movies.forEach(movie => renderMovie(movie))
+    } else {
+      searchFavoriteMovies(inputValue)
+    }
   } else {
-    clearAllMovies()
     getAllPopularMovies()
-    input.value = inputValue
+    checkboxInput.checked = false
   }
+  input.value = inputValue
+}
+
+function searchFavoriteMovies(movieName) {
+  const formatedMovieName = formatText(movieName)
+  console.log(formatedMovieName)
+  const movies = LocalStorage.getFavoriteMovies() || []
+  const findMovies = movies.filter(movie =>
+    movie.title.includes(formatedMovieName)
+  )
+  if (findMovies.length == 0) sorryMensage(0)
+  else findMovies.forEach(movie => renderMovie(movie))
+}
+
+function formatText(text) {
+  const lowerCase = text.toLowerCase()
+  const textArray = lowerCase.split(' ')
+  const tratedArray = []
+
+  for (let i = 0; i < textArray.length; i++) {
+    tratedArray[i] =
+      textArray[i].charAt(0).toUpperCase() + textArray[i].slice(1)
+  }
+
+  return tratedArray.join(' ')
 }
 
 function clearAllMovies() {
