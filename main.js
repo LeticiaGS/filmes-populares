@@ -1,5 +1,5 @@
-import { API } from '../services/api.js'
-import { LocalStorage } from '../services/localStorage.js'
+import { API } from '././services/api.js'
+import { LocalStorage } from '././services/localStorage.js'
 
 const moviesContainer = document.getElementById('movies')
 const input = document.querySelector('input')
@@ -84,8 +84,8 @@ function clearAllMovies() {
 
 function favoriteButtonPressed(event, movie) {
   const favoriteState = {
-    favorited: 'assets/heart-fill.svg',
-    notFavorited: 'assets/heart.svg'
+    favorited: '././assets/heart-fill.svg',
+    notFavorited: '././assets/heart.svg'
   }
 
   if (event.target.src.includes(favoriteState.notFavorited)) {
@@ -118,7 +118,7 @@ function renderMovie(movie) {
   const isFavorited = LocalStorage.checkMovieIsFavorited(id)
   const year = new Date(release_date).getFullYear()
   let image = ''
-  if (poster_path == null) image = 'assets/noImageMovie.png'
+  if (poster_path == null) image = '././assets/noImageMovie.png'
   else image = `https://image.tmdb.org/t/p/w500${poster_path}`
 
   const movieElement = document.createElement('div')
@@ -147,9 +147,9 @@ function renderMovie(movie) {
   iconsElements.classList.add('icons')
   titleElement.classList.add('title')
 
-  iconStar.src = '/assets/Star.png'
+  iconStar.src = '././assets/Star.png'
   iconStar.alt = 'star-icon'
-  iconHeart.src = isFavorited ? 'assets/heart-fill.svg' : 'assets/heart.svg'
+  iconHeart.src = isFavorited ? '././assets/heart-fill.svg' : '././assets/heart.svg'
   iconHeart.alt = 'star-icon'
 
   titleElement.textContent = `${title} (${year})`
