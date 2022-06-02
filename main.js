@@ -53,10 +53,13 @@ async function searchMovie() {
 
 function searchFavoriteMovies(movieName) {
   const formatedMovieName = formatText(movieName)
-  console.log(formatedMovieName)
   const movies = LocalStorage.getFavoriteMovies() || []
+  const regex = /[^a-z0-9 ]/gi
+  const replacement = ''
   const findMovies = movies.filter(movie =>
-    movie.title.includes(formatedMovieName)
+    movie.title.replace('-', ' ')
+               .replace(regex, replacement)
+               .includes(formatedMovieName)
   )
   if (findMovies.length == 0) sorryMensage(0)
   else findMovies.forEach(movie => renderMovie(movie))
