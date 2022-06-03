@@ -23,13 +23,13 @@ function checkCkeckboxStatus() {
 
 function showFavoriteMovies() {
   const movies = LocalStorage.getFavoriteMovies() || []
-    if (movies.length == 0) {
-      clearAllMovies()
-      sorryMensage(1)
-    } else {
-      clearAllMovies()
-      movies.forEach(movie => renderMovie(movie))
-    }
+  if (movies.length == 0) {
+    clearAllMovies()
+    sorryMensage(1)
+  } else {
+    clearAllMovies()
+    movies.forEach(movie => renderMovie(movie))
+  }
 }
 
 input.addEventListener('keyup', e => {
@@ -63,9 +63,10 @@ function searchFavoriteMovies(movieName) {
   const regex = /[^a-z0-9 ]/gi
   const replacement = ''
   const findMovies = movies.filter(movie =>
-    movie.title.replace('-', ' ')
-               .replace(regex, replacement)
-               .includes(formatedMovieName)
+    movie.title
+      .replace('-', ' ')
+      .replace(regex, replacement)
+      .includes(formatedMovieName)
   )
   if (findMovies.length == 0) sorryMensage(0)
   else findMovies.forEach(movie => renderMovie(movie))
@@ -90,10 +91,11 @@ function clearAllMovies() {
 
 function favoriteButtonPressed(event, movie) {
   const favoriteState = {
-    favorited: '././assets/heart-fill.svg',
-    notFavorited: '././assets/heart.svg'
+    favorited: 'assets/heart-fill.svg',
+    notFavorited: 'assets/heart.svg'
   }
-
+  console.log(event.target.src.includes(favoriteState.notFavorited))
+  //debugger
   if (event.target.src.includes(favoriteState.notFavorited)) {
     event.target.src = favoriteState.favorited
     LocalStorage.saveToLocalStorage(movie)
@@ -154,9 +156,11 @@ function renderMovie(movie) {
   iconsElements.classList.add('icons')
   titleElement.classList.add('title')
 
-  iconStar.src = '././assets/Star.png'
+  iconStar.src = 'assets/Star.png'
   iconStar.alt = 'star-icon'
-  iconHeart.src = isFavorited ? '././assets/heart-fill.svg' : '././assets/heart.svg'
+  iconHeart.src = isFavorited
+    ? 'assets/heart-fill.svg'
+    : 'assets/heart.svg'
   iconHeart.alt = 'star-icon'
 
   titleElement.textContent = `${title} (${year})`
