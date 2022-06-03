@@ -14,16 +14,22 @@ function checkCkeckboxStatus() {
   clearAllMovies()
   if (isChecked) {
     input.value = ''
-    const movies = LocalStorage.getFavoriteMovies() || []
-    if (movies.length == 0) {
-      sorryMensage(1)
-    } else {
-      movies.forEach(movie => renderMovie(movie))
-    }
+    showFavoriteMovies()
   } else {
     getAllPopularMovies()
     input.value = ''
   }
+}
+
+function showFavoriteMovies() {
+  const movies = LocalStorage.getFavoriteMovies() || []
+    if (movies.length == 0) {
+      clearAllMovies()
+      sorryMensage(1)
+    } else {
+      clearAllMovies()
+      movies.forEach(movie => renderMovie(movie))
+    }
 }
 
 input.addEventListener('keyup', e => {
@@ -94,6 +100,7 @@ function favoriteButtonPressed(event, movie) {
   } else {
     event.target.src = favoriteState.notFavorited
     LocalStorage.removeFromLocalStorage(movie.id)
+    showFavoriteMovies()
   }
 }
 
